@@ -4,7 +4,7 @@ const StatsLib = {
   min: (arr) => arr.length ? Math.min(...arr) : 0,
 };
 
-export const calculateMailboxStats = (records) => {
+export const calculateColumnStats = (records) => {
   if (!records?.length) return null;
 
   const temps = records.map(r => parseFloat(r.temp)).filter(v => !isNaN(v));
