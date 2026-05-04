@@ -1,7 +1,6 @@
 import React from 'react';
 
 const MailboxTable = ({ records, stats }) => {
-  if (!stats) return null;
   return (
     <div className="tableContainer">
       <table className="heaterTable">

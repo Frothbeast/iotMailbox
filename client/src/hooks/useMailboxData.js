@@ -14,27 +14,26 @@ export function useMailboxData(hours) {
                     if (Array.isArray(data)) {
                         const mappedData = data.map(r => ({
                             datetime: r.datetime,
-                            // Mapping to names expected by calculateMailboxStats and MailboxTable
                             temp: r.temp, 
                             rssi: r.rssi,
                             triggerEvent: r.triggerEvent,
-                            // Retaining original fields if needed for other logic
                             readingCount: r.readingCount
                         }));
                         setMailboxRecords(mappedData);
+                    } else {
+                        setMailboxRecords([]); // Ensure it stays an array if API fails or is empty
                     }
                     setIsLoading(false);
                 })
                 .catch(err => {
                     console.error("Fetch error:", err);
+                    setMailboxRecords([]);
                     setIsLoading(false);
                 });
         };
 
         const setupInterval = () => {
             if (interval) clearInterval(interval);
-            
-            // Poll at 1s if visible, 60s if hidden to save server resources
             const pollRate = document.visibilityState === 'visible' ? 1000 : 60000;
             interval = setInterval(fetchData, pollRate);
         };
@@ -42,10 +41,7 @@ export function useMailboxData(hours) {
         fetchData();
         setupInterval();
 
-        const handleVisibilityChange = () => {
-            setupInterval();
-        };
-
+        const handleVisibilityChange = () => setupInterval();
         document.addEventListener('visibilitychange', handleVisibilityChange);
 
         return () => {

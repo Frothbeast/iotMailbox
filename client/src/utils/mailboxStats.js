@@ -5,7 +5,14 @@ const StatsLib = {
 };
 
 export const calculateColumnStats = (records) => {
-  if (!records?.length) return null;
+  if (!records?.length) return {
+    temp: { avg: 0, max: 0, min: 0 },
+    rssi: { avg: 0, max: 0, min: 0 },
+    lastTime: "--:--",
+    lastTemp: "--",
+    lastRSSI: "--",
+    lastTrigger: "NONE"
+  };
 
   const temps = records.map(r => parseFloat(r.temp)).filter(v => !isNaN(v));
   const rssis = records.map(r => parseInt(r.rssi)).filter(v => !isNaN(v));
