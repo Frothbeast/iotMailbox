@@ -1,0 +1,55 @@
+services:
+  permission_fixer:
+    image: alpine
+    volumes:
+      - ../iotMailbox:/iotMailbox
+    command: >
+      sh -c "chmod +x /iotMailbox/database/schema.sh"
+  shared_db_container:
+    image: mysql:8.0
+    environment:
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - MYSQL_DATABASE=${DB_NAME}
+      - DB_NAME=${DB_NAME}
+      - DB_USER=${DB_USER}
+      - DB_PASS=${DB_PASS}
+    depends_on:
+      permission_fixer:
+        condition: service_completed_successfully
+    volumes:
+      - Mailbox_db_data:/var/lib/mysql
+      - ./database/schema.sh:/docker-entrypoint-initdb.d/01-init-db.sh
+    networks:
+      - iot-network
+  mailbox-service:
+    build: 
+      context: .
+      args:
+      - PUBLIC_URL=/  # Forces standalone to look at the root
+      - REACT_APP_MAILBOX_API_URL=${REACT_APP_MAILBOX_API_URL}
+    environment:
+      - TZ=America/Toronto
+      - API_PORT=${API_PORT}
+      - BIND_HOST=${BIND_HOST}
+      - DB_HOST=${DB_HOST}
+      - DB_NAME=${DB_NAME}
+      - DB_USER=${DB_USER}
+      - DB_PASS=${DB_PASS}
+      - STATIC_FOLDER=${STATIC_FOLDER}
+    restart: always
+    ports:
+      - "${MAILBOX_API_PORT}:${API_PORT}"   
+      - "${COLLECTOR_HOST_PORT}:${COLLECTOR_PORT}"
+    env_file: .env
+    depends_on:
+      - shared_db_container
+    networks:
+      - iot-network
+
+networks:
+  iot-network:
+    driver: bridge
+    name: iot-network
+
+volumes:
+  mailbox_db_data:
