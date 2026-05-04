@@ -1,7 +1,7 @@
 import React from 'react';
 import MailboxChart from '../MailboxTable/MailboxChart'; // Reuse existing chart component
 
-const MailboxControlBar = ({ records, stats, onHoursChange }) => {
+const ControlBar = ({ records, stats, onHoursChange }) => {
   return (
     <header className="controlBar">
       <div className="brandSection">
@@ -28,7 +28,7 @@ const MailboxControlBar = ({ records, stats, onHoursChange }) => {
       <div className="chartSection">
         <div className="chartContainer">
            <div className="chartWatermark">TEMP</div>
-           <HeaterChart 
+           <MailboxChart 
               labels={records.map((_, i) => i)}
               datasets={[{ label: "Temp", color: "orange", data: records.map(r => r.temp) }]}
               options={{ responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { display: false }, y: { display: false } } }}
@@ -39,4 +39,4 @@ const MailboxControlBar = ({ records, stats, onHoursChange }) => {
   );
 };
 
-export default MailboxControlBar;
+export default ControlBar;
