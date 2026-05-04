@@ -1,5 +1,5 @@
 import React from 'react';
-import HeaterChart from '../HeaterTable/HeaterChart'; // Reuse existing chart component
+import MailboxChart from '../MailboxTable/MailboxChart'; // Reuse existing chart component
 
 const MailboxControlBar = ({ records, stats, onHoursChange }) => {
   return (
