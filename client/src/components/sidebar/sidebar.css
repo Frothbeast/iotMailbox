@@ -1,0 +1,55 @@
+.sidebar {
+  position: fixed;
+  right: 100%; 
+  top: var(--controlBar-height);
+  width: 100%;
+  height: calc(100% - var(--controlBar-height));
+  background-color: var(--menu-background);
+  box-shadow: -2px 0 5px rgba(0,0,0,0.2);
+  transition: right 0.3s ease;
+  z-index: 200;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+.sidebar.open {
+  right: 0; 
+}
+
+.sidebarContent {
+  container-type: size;
+  container-name: sidebarArea;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  border: 2px solid black;
+  box-sizing: border-box;
+}
+
+.sidebar .chartContainer {
+  flex: 0 0 100%; 
+  width: 100%;
+  position: relative;
+  box-sizing: border-box;
+  border: 2px solid black;
+  overflow: hidden; 
+}
+
+#tempChart {
+  flex: 0 0 100%; 
+  width: 100%;
+  height: 50%;
+}
+
+ @container sidebarArea (max-width: 600px) {
+  .sidebar [class^="chartContainer"] {
+    flex-basis: 100%;
+    height: 50%; 
+  }
+  #tempChart {
+  height: 50%;
+}
+}
