@@ -1,9 +1,9 @@
 import React from 'react';
 
-const MailboxTable = ({ records, stats }) => {
+const MailboxTable = ({ records, columnStats }) => {
   return (
     <div className="tableContainer">
-      <table className="heaterTable">
+      <table className="mailboxTable">
         <thead>
           <tr>
             <th>Time</th>
