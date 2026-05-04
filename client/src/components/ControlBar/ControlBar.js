@@ -1,7 +1,7 @@
 import React from 'react';
 import MailboxChart from '../MailboxTable/MailboxChart'; // Reuse existing chart component
 
-const ControlBar = ({ records, stats, onHoursChange }) => {
+const ControlBar = ({ records, columnStats, onHoursChange }) => {
   return (
     <header className="controlBar">
       <div className="brandSection">
@@ -11,12 +11,12 @@ const ControlBar = ({ records, stats, onHoursChange }) => {
       <div className="centerSection">
         <div className="lastRun">
           <span className="label">Last Event</span>
-          <span className="value">{stats?.lastTrigger}</span>
-          <span className="unit">{stats?.lastTime}</span>
+          <span className="value">{columnStats?.lastTrigger}</span>
+          <span className="unit">{columnStats?.lastTime}</span>
         </div>
         <div className="lastTemp">
           <span className="label">Outside Temp</span>
-          <span className="value">{stats?.lastTemp}</span>
+          <span className="value">{columnStats?.lastTemp}</span>
           <span className="unit">°C</span>
         </div>
         <select onChange={(e) => onHoursChange(e.target.value)} className="myBUTTon">
