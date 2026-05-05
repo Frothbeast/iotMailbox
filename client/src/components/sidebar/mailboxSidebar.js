@@ -7,7 +7,7 @@ import zoomPlugin from 'chartjs-plugin-zoom';
 
 ChartJS.register(...registerables, zoomPlugin);
 
-const GreenhouseSidebar = ({ isOpen, records, selectedHours }) => {
+const MailboxSidebar = ({ isOpen, records, selectedHours }) => {
   const timeUnit = selectedHours <= 1 ? 'minute' : (selectedHours <= 48 ? 'hour' : 'day');
 
   const createConfig = (unit) => ({
