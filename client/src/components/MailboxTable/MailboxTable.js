@@ -13,6 +13,7 @@ const MailboxTable = ({ records, columnStats }) => {
           </tr>
         </thead>
         <tbody className="mailboxTableBody">
+          <tr className="mailboxTablePlaceholder"></tr>
           {Array.isArray(records) && records.length > 0 ? (
             records.map((record, i) => (
               <tr key={record.id || i} className="mailboxTableRow">
