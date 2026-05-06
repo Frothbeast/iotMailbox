@@ -1,4 +1,5 @@
 import React from 'react';
+import './MailboxTable.css';
 
 const MailboxTable = ({ records, columnStats }) => {
   return (
