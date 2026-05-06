@@ -2,7 +2,7 @@ import React from 'react';
 import MailboxChart from '../MailboxTable/MailboxChart'; // Reuse existing chart component
 import './ControlBar.css';
 
-const ControlBar = ({ records, columnStats, onHoursChange, clipClick, serverTime, toggleSidebar, cl1pClick, isSidebarOpen }) => {
+const ControlBar = ({ records, columnStats, onHoursChange, selectedHours, clipClick, serverTime, toggleSidebar, cl1pClick, isSidebarOpen }) => {
   return (
     <header className="controlBar">
       <div className="brandSection">
@@ -27,11 +27,17 @@ const ControlBar = ({ records, columnStats, onHoursChange, clipClick, serverTime
         <div className="buttonRow">
           <button className="sidebarButton myBUTTon" onClick={toggleSidebar}>
               {isSidebarOpen ? "Table" : "Graph"}
-            </button>
-            <button onClick={cl1pClick} className="cl1pButton myBUTTon">CL1P</button>
-          <select onChange={(e) => onHoursChange(e.target.value)} className="myBUTTon">
-            <option value="24">24 Hours</option>
-            <option value="168">7 Days</option>
+          </button>
+          <button onClick={cl1pClick} className="cl1pButton myBUTTon">CL1P</button>
+          <select 
+            className="selectedHours myBUTTon" 
+            value={selectedHours} 
+            onChange={(e) => onHoursChange(Number(e.target.value))}
+          >
+            <option value={1}>1 Hour</option>
+            <option value={8}>8 Hour</option>
+            <option value={24}>24 Hour</option>
+            <option value={168}>168 Hour</option>
           </select>
         </div>
       </div>

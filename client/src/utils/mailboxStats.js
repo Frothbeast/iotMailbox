@@ -24,6 +24,6 @@ export const calculateColumnStats = (records) => {
     lastTime: new Date(last.datetime).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }),
     lastTemp: last.temp,
     lastRSSI: last.rssi,
-    lastTrigger: last.triggerEvent === 1 ? "MAIL" : "HEARTBEAT"
+    lastTrigger: last.triggerEvent
   };
 };
