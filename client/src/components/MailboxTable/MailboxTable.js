@@ -12,15 +12,27 @@ const MailboxTable = ({ records, columnStats }) => {
             <th>RSSI</th>
           </tr>
         </thead>
-        <tbody>
-          {records.map((r, i) => (
-            <tr key={i}>
-              <td>{new Date(r.datetime).toLocaleString()}</td>
-              <td>{r.triggerEvent === 1 ? "Mail" : "Check"}</td>
-              <td>{r.temp}</td>
-              <td>-{r.rssi} dBm</td>
-            </tr>
-          ))}
+        <tbody className="mailboxTableBody">
+          {Array.isArray(records) && records.length > 0 ? (
+            records.map((record, i) => (
+              <tr key={record.id || i} className="mailboxTableRow">
+                <td className="mailboxTableCell">
+                  {record.datetime 
+                    ? new Date(record.datetime).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: true }) 
+                    : "N/a"}
+                </td>
+                <td className="mailboxTableCell">
+                  {record.triggerEvent === 1 ? "Mail" : "Check"}
+                </td>
+                <td className="mailboxTableCell">{record.temp ?? "N/a"}</td>
+                <td className="mailboxTableCell">
+                  {record.rssi ? `-${record.rssi} dBm` : "N/a"}
+                </td>
+              </tr>
+            ))
+          ) : (
+            <tr><td colSpan="4" style={{textAlign: 'center'}}>No data for selected period</td></tr>
+          )}
         </tbody>
       </table>
     </div>
