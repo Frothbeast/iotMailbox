@@ -10,7 +10,7 @@ const MailboxTable = ({ records, columnStats }) => {
             <th>Time</th>
             <th>Trigger</th>
             <th>Temp °C</th>
-            <th>RSSI</th>
+            <th>RSSI dB</th>
           </tr>
         </thead>
         <tbody className="mailboxTableBody">
@@ -28,7 +28,7 @@ const MailboxTable = ({ records, columnStats }) => {
                 </td>
                 <td className="mailboxTableCell">{record.temp ?? "N/a"}</td>
                 <td className="mailboxTableCell">
-                  {record.rssi ? `-${record.rssi} dBm` : "N/a"}
+                  {record.rssi ? `${record.rssi}` : "N/a"}
                 </td>
               </tr>
             ))
