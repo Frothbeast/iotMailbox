@@ -1,7 +1,7 @@
 import React from 'react';
 import MailboxChart from '../MailboxTable/MailboxChart'; // Reuse existing chart component
 
-const ControlBar = ({ records, columnStats, onHoursChange, clipClick, serverTime, toggleSidebar }) => {
+const ControlBar = ({ records, columnStats, onHoursChange, clipClick, serverTime, toggleSidebar, cl1pClick, isSidebarOpen }) => {
   return (
     <header className="controlBar">
       <div className="brandSection">
