@@ -23,7 +23,7 @@ const MailboxTable = ({ records, columnStats }) => {
                     : "N/a"}
                 </td>
                 <td className="mailboxTableCell">
-                  {record.triggerEvent === 1 ? "Mail" : "Check"}
+                  {record.triggerEvent}
                 </td>
                 <td className="mailboxTableCell">{record.temp ?? "N/a"}</td>
                 <td className="mailboxTableCell">
