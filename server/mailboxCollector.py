@@ -39,7 +39,7 @@ def handle_mailbox_data(hex_str):
 
 def run_collector():
     server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    server.bind(('0.0.0.0', int(os.getenv('COLLECTOR_PORT', 5001))))
+    server.bind(('0.0.0.0', int(os.getenv('COLLECTOR_PORT'))))
     server.listen(5)
     
     while True:

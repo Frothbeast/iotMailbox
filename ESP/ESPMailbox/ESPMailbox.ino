@@ -68,7 +68,7 @@ void setup() {
 }
 
 void sendZeroPacket() {
-    WiFi.begin(WIFI_SSID, WIFI_PASS, 0, NULL, true); // WPA3[cite: 1, 6]
+    WiFi.begin(WIFI_SSID, WIFI_PASS);
     
     int timeout = 0;
     while (WiFi.status() != WL_CONNECTED && timeout < 20) {
@@ -93,7 +93,7 @@ void sendZeroPacket() {
 }
 
 void sendBufferedData() {
-    WiFi.begin(WIFI_SSID, WIFI_PASS, 0, NULL, true); // WPA3[cite: 1, 6]
+    WiFi.begin(WIFI_SSID, WIFI_PASS);
     
     int timeout = 0;
     while (WiFi.status() != WL_CONNECTED && timeout < 20) {
