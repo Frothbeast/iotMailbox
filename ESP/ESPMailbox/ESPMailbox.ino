@@ -107,25 +107,47 @@ void sendZeroPacket() {
 
 void sendBufferedData() {
     WiFi.begin(WIFI_SSID, WIFI_PASS);
-    int timeout = 0;
-    while (WiFi.status() != WL_CONNECTED && timeout < 20) {
+    int wifiTimeout = 0;
+    while (WiFi.status() != WL_CONNECTED && wifiTimeout < 20) {
         delay(500);
-        timeout++;
+        wifiTimeout++;
     }
+
     if (WiFi.status() == WL_CONNECTED) {
         WiFiClient client;
-        for (int i = 0; i < packetCount; i++) {
-            if (client.connect(SERVER_IP, SERVER_PORT)) {
+        
+        // Use a 10-second timeout for the initial connection
+        if (client.connect(SERVER_IP, SERVER_PORT)) {
+            client.setTimeout(10); // Sets internal timeout to 10 seconds
+
+            for (int i = 0; i < packetCount; i++) {
                 char hexMsg[21];
                 sprintf(hexMsg, "%02X%02X%04X%04X", 
                         buffer[i].id, buffer[i].trigger, 
                         (uint16_t)buffer[i].temp, (uint16_t)buffer[i].rssi);
+                
                 client.println(hexMsg); 
+
+                // Wait for ACK with 10-second hanging protection
                 unsigned long start = millis();
-                while (!client.available() && millis() - start < 1000);
-                if (client.available()) client.readStringUntil('\n'); 
-                client.stop();
+                bool gotAck = false;
+                while (millis() - start < 10000) {
+                    if (client.available()) {
+                        client.readStringUntil('\n'); 
+                        gotAck = true;
+                        break;
+                    }
+                    delay(10); 
+                }
+
+                if (!gotAck) {
+                    #if DEBUG
+                      Serial.println("ACK timeout. Aborting buffer.");
+                    #endif
+                    break; 
+                }
             }
+            client.stop();
         }
         packetCount = 0; 
     }
