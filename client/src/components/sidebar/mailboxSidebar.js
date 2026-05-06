@@ -63,7 +63,15 @@ const MailboxSidebar = ({ isOpen, records, selectedHours }) => {
                 label: "Temp °C",
                 color: "red",
                 data: records.map(r => r.temp),
-              },
+              }
+            ]}
+            options={optTemp}
+          />
+        </div>
+        <div className="chartContainer">
+          <MailboxChart
+            labels={labels}
+            datasets={[
               {
                 label: "RSSI",
                 color: "pink",

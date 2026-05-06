@@ -48,7 +48,15 @@ const ControlBar = ({ records, columnStats, onHoursChange, selectedHours, clipCl
            <MailboxChart 
               labels={records.map((_, i) => i)}
               datasets={[{ label: "Temp", color: "orange", data: records.map(r => r.temp) }]}
-              options={{ responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { display: false }, y: { display: false } } }}
+              options={{ responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { display: false , reverse:true }, y: { display: false } } }}
+           />
+        </div>
+        <div className="chartContainer">
+           <div className="chartWatermark">RSSI</div>
+           <MailboxChart 
+              labels={records.map((_, i) => i)}
+              datasets={[{ label: "RSSI", color: "orange", data: records.map(r => r.rssi) }]}
+              options={{ responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { display: false , reverse:true }, y: { display: false } } }}
            />
         </div>
       </div>
