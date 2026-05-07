@@ -43,23 +43,21 @@ def run_collector():
     server.listen(5)
     
     while True:
-        conn = None
+        conn, addr = server.accept()
+        conn.settimeout(5.0)
         try:
-            conn, addr = server.accept()
-            # Set a 5-second timeout so a silent client doesn't hang the server indefinitely
-            conn.settimeout(5.0) 
-            data = conn.recv(1024)
-            if data:
+            # Use a loop to handle multiple packets from the same connection
+            while True:
+                data = conn.recv(1024)
+                if not data:
+                    break # ESP32 closed the connection
+                
                 handle_mailbox_data(data.decode('ascii').strip())
-                # The \n acts as a terminator for the ESP32
                 conn.sendall(b"ACK\n")
         except socket.timeout:
-            print("Connection timed out waiting for data")
-        except Exception as e:
-            print(f"Socket Error: {e}")
+            pass
         finally:
-            if conn:
-                conn.close()
+            conn.close()
 
 if __name__ == "__main__":
     run_collector()

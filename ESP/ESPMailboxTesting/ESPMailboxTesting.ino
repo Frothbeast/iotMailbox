@@ -124,7 +124,7 @@ void sendBufferedData() {
                     if (client.available()) {
                         String response = client.readStringUntil('\n');
                         response.trim();
-                        if (response.equals("ACK")) {
+                        if (response.indexOf("ACK") >= 0) { 
                             gotAck = true;
                             break;
                         }
