@@ -34,7 +34,7 @@ export function useMailboxData(hours) {
 
         const setupInterval = () => {
             if (interval) clearInterval(interval);
-            const pollRate = document.visibilityState === 'visible' ? 1000 : 60000;
+            const pollRate = document.visibilityState === 'visible' ? 30000 : 60000;
             interval = setInterval(fetchData, pollRate);
         };
 

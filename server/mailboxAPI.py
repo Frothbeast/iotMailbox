@@ -125,7 +125,7 @@ def serve(path):
         return send_from_directory(app.static_folder, path)
     return send_from_directory(app.static_folder, 'index.html')
 
-@app.route('/api/sync', methods=['POST'])
+@app.route('/api/cl1p', methods=['POST'])
 def handle_sync():
     urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
     headers = {"cl1papitoken": CL1P_TOKEN} if CL1P_TOKEN else {}
