@@ -51,7 +51,8 @@ def run_collector():
             data = conn.recv(1024)
             if data:
                 handle_mailbox_data(data.decode('ascii').strip())
-                conn.sendall(b"ACK")
+                # The \n acts as a terminator for the ESP32
+                conn.sendall(b"ACK\n")
         except socket.timeout:
             print("Connection timed out waiting for data")
         except Exception as e:
