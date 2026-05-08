@@ -1,6 +1,6 @@
 /* Table.css */
 
-.mailboxTableContainer {
+.tableContainer {
   top: 0;
   display: inline-block;
   container-name: MailboxContainer;
@@ -15,7 +15,7 @@
   -ms-overflow-style: none;
 }
 
-.mailboxTableContainer::-webkit-scrollbar {
+.tableContainer::-webkit-scrollbar {
     display: none;
 }
 
