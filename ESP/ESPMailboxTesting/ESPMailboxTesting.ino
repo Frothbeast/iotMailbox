@@ -26,7 +26,7 @@ DallasTemperature sensors(&oneWire);
 Adafruit_NeoPixel pixels(NUM_PIXELS, RGB_LED_PIN, NEO_GRB + NEO_KHZ800);
 
 void setup() {
-    // Release hold so we can modify the pin if it was stuck from previous sleep
+    // 1. Release the hold immediately so the pin can be used
     gpio_hold_dis((gpio_num_t)HALL_SENSOR_PIN);
 
     Serial.begin(115200);
@@ -42,7 +42,7 @@ void setup() {
     Serial.println(hallState == LOW ? "LOW (Magnet Present)" : "HIGH (No Magnet)");
 
     esp_sleep_wakeup_cause_t reason = esp_sleep_get_wakeup_cause();
-    uint8_t currentTrigger = 1;
+    uint8_t currentTrigger = 1; 
 
     if (reason == ESP_SLEEP_WAKEUP_UNDEFINED) {
         Serial.println("Wake Reason: Power On / Reset");
@@ -88,20 +88,22 @@ void setup() {
     pixels.clear();
     pixels.show();
 
-    // Determine target wakeup level
+    // 2. CONFIGURE NEXT WAKEUP
     int wakeLevel = (hallState == LOW) ? 1 : 0; 
     
-    // CRITICAL: Configure the pin for deep sleep persistence
+    // Ensure pull-up is active
     pinMode(HALL_SENSOR_PIN, INPUT_PULLUP);
+    
+    Serial.print("Configuring Wakeup for Level: ");
+    Serial.println(wakeLevel);
+    
     esp_deep_sleep_enable_gpio_wakeup(1ULL << HALL_SENSOR_PIN, (esp_deepsleep_gpio_wake_up_mode_t)wakeLevel);
     
-    // Hold the pull-up state so it doesn't vanish when the CPU stops
+    // 3. LOCK THE PULL-UP STATE
     gpio_hold_en((gpio_num_t)HALL_SENSOR_PIN);
     
     esp_sleep_enable_timer_wakeup(60ULL * 1000000ULL);
     
-    Serial.print("Configuring Wakeup for Level: ");
-    Serial.println(wakeLevel);
     Serial.println("Entering Deep Sleep...");
     Serial.flush();
     esp_deep_sleep_start();
