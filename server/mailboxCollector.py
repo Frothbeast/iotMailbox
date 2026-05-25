@@ -44,39 +44,48 @@ def run_collector():
     
     while True:
         conn, addr = server.accept()
-        received_buffer = ""
+        lines = []
         try:
-            # Set a short timeout so recv doesn't hang if the client keeps connection open
-            conn.settimeout(0.5)
+            # Match the client's explicit internal loop expectations
+            conn.settimeout(12.0)
+            
+            # Use a persistent residual storage buffer to hold fragments across read boundaries
+            remainder_buffer = ""
+            
             while True:
                 data = conn.recv(1024)
                 if not data:
                     break
-                received_buffer += data.decode('ascii')
-        except socket.timeout:
-            # Timeout means client stopped sending data but left connection open; proceed to parse
+                
+                remainder_buffer += data.decode('ascii', errors='ignore')
+                
+                # Extract and process completed individual lines out of the stream 
+                while "\n" in remainder_buffer:
+                    line_segment, remainder_buffer = remainder_buffer.split("\n", 1)
+                    clean_line = line_segment.strip()
+                    if clean_line:
+                        lines.append(clean_line)
+                        # Immediately ACK each single individual entry line to let the client step forward [cite: 25, 27]
+                        conn.sendall(b"ACK\n")
+                        
+        except (socket.timeout, socket.error):
             pass
-        except Exception as e:
-            print(f"Connection Error: {e}")
         finally:
-            # Restore blocking mode to safely send the ACK response
-            conn.setblocking(True)
+            # Process remaining text without trailing newline markers
+            if remainder_buffer.strip():
+                lines.append(remainder_buffer.strip())
             
-            lines = [line.strip() for line in received_buffer.split('\n') if line.strip()]
+            conn.close()
+            
             if lines:
                 current_time = datetime.now()
                 total_lines = len(lines)
                 
                 for index, line in enumerate(lines):
-                    minutes_back = (total_lines - 1 - index) * 10
-                    line_timestamp = current_time - timedelta(minutes=minutes_back)
-                    handle_mailbox_data(line, line_timestamp)
-                    
-                try:
-                    conn.sendall(b"ACK\n")
-                except Exception:
-                    pass
-            conn.close()
+                    if len(line) >= 12:
+                        minutes_back = (total_lines - 1 - index) * 10
+                        line_timestamp = current_time - timedelta(minutes=minutes_back)
+                        handle_mailbox_data(line, line_timestamp)
 
 if __name__ == "__main__":
     run_collector()
