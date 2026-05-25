@@ -38,25 +38,31 @@ def handle_mailbox_data(hex_str, timestamp):
 
 def run_collector():
     server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     server.bind(('0.0.0.0', int(os.getenv('COLLECTOR_PORT'))))
     server.listen(5)
     
     while True:
         conn, addr = server.accept()
-        conn.settimeout(5.0)
-        
-        # Buffer to accumulate incoming data from the connection
         received_buffer = ""
         try:
+            # Set a short timeout so recv doesn't hang if the client keeps connection open
+            conn.settimeout(0.5)
             while True:
                 data = conn.recv(1024)
                 if not data:
                     break
                 received_buffer += data.decode('ascii')
+        except socket.timeout:
+            # Timeout means client stopped sending data but left connection open; proceed to parse
+            pass
+        except Exception as e:
+            print(f"Connection Error: {e}")
+        finally:
+            # Restore blocking mode to safely send the ACK response
+            conn.setblocking(True)
             
-            # Split lines by newline and filter out empty strings
             lines = [line.strip() for line in received_buffer.split('\n') if line.strip()]
-            
             if lines:
                 current_time = datetime.now()
                 total_lines = len(lines)
@@ -66,10 +72,10 @@ def run_collector():
                     line_timestamp = current_time - timedelta(minutes=minutes_back)
                     handle_mailbox_data(line, line_timestamp)
                     
-                conn.sendall(b"ACK\n")
-        except socket.timeout:
-            pass
-        finally:
+                try:
+                    conn.sendall(b"ACK\n")
+                except Exception:
+                    pass
             conn.close()
 
 if __name__ == "__main__":
