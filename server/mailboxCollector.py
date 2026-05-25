@@ -16,7 +16,6 @@ DB_CONFIG = {
 def handle_mailbox_data(hex_str, timestamp):
     conn = None
     try:
-        # Hex format: ID(2) Trigger(2) Temp*100(4) RSSI(4)
         dev_id = int(hex_str[0:2], 16)
         trigger = int(hex_str[2:4], 16)
         temp_raw = int(hex_str[4:8], 16)
@@ -45,25 +44,24 @@ def run_collector():
     while True:
         conn, addr = server.accept()
         conn.settimeout(5.0)
+        
+        # Buffer to accumulate incoming data from the connection
+        received_buffer = ""
         try:
-            lines = []
             while True:
                 data = conn.recv(1024)
                 if not data:
                     break
-                
-                # Split incoming stream by newlines to handle separate data entries
-                chunk = data.decode('ascii').strip().split('\n')
-                for line in chunk:
-                    clean_line = line.strip()
-                    if clean_line:
-                        lines.append(clean_line)
+                received_buffer += data.decode('ascii')
+            
+            # Split lines by newline and filter out empty strings
+            lines = [line.strip() for line in received_buffer.split('\n') if line.strip()]
             
             if lines:
                 current_time = datetime.now()
                 total_lines = len(lines)
+                
                 for index, line in enumerate(lines):
-                    # Calculate negative offset from the current time based on index positions
                     minutes_back = (total_lines - 1 - index) * 10
                     line_timestamp = current_time - timedelta(minutes=minutes_back)
                     handle_mailbox_data(line, line_timestamp)
