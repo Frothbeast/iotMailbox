@@ -1,7 +1,7 @@
 import os
 import socket
 import mysql.connector
-from datetime import datetime
+from datetime import datetime, timedelta
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -13,7 +13,7 @@ DB_CONFIG = {
     'database': os.getenv('DB_NAME'),
 }
 
-def handle_mailbox_data(hex_str):
+def handle_mailbox_data(hex_str, timestamp):
     conn = None
     try:
         # Hex format: ID(2) Trigger(2) Temp*100(4) RSSI(4)
@@ -28,7 +28,7 @@ def handle_mailbox_data(hex_str):
         conn = mysql.connector.connect(**DB_CONFIG)
         cursor = conn.cursor()
         query = "INSERT INTO mailboxData (datetime, deviceID, triggerEvent, temp, rssi) VALUES (%s, %s, %s, %s, %s)"
-        cursor.execute(query, (datetime.now(), dev_id, trigger, temp_c, rssi))
+        cursor.execute(query, (timestamp, dev_id, trigger, temp_c, rssi))
         conn.commit()
         cursor.close()
     except Exception as e:
@@ -46,13 +46,28 @@ def run_collector():
         conn, addr = server.accept()
         conn.settimeout(5.0)
         try:
-            # Use a loop to handle multiple packets from the same connection
+            lines = []
             while True:
                 data = conn.recv(1024)
                 if not data:
-                    break # ESP32 closed the connection
+                    break
                 
-                handle_mailbox_data(data.decode('ascii').strip())
+                # Split incoming stream by newlines to handle separate data entries
+                chunk = data.decode('ascii').strip().split('\n')
+                for line in chunk:
+                    clean_line = line.strip()
+                    if clean_line:
+                        lines.append(clean_line)
+            
+            if lines:
+                current_time = datetime.now()
+                total_lines = len(lines)
+                for index, line in enumerate(lines):
+                    # Calculate negative offset from the current time based on index positions
+                    minutes_back = (total_lines - 1 - index) * 10
+                    line_timestamp = current_time - timedelta(minutes=minutes_back)
+                    handle_mailbox_data(line, line_timestamp)
+                    
                 conn.sendall(b"ACK\n")
         except socket.timeout:
             pass
