@@ -16,6 +16,8 @@ DB_CONFIG = {
 def handle_mailbox_data(hex_str, timestamp):
     conn = None
     try:
+        # Explicit 12-character slicing matching the ESP32 sprintf layout:
+        # %02X (0:2) %02X (2:4) %04X (4:8) %04X (8:12)
         dev_id = int(hex_str[0:2], 16)
         trigger = int(hex_str[2:4], 16)
         temp_raw = int(hex_str[4:8], 16)
@@ -46,10 +48,7 @@ def run_collector():
         conn, addr = server.accept()
         lines = []
         try:
-            # Match the client's explicit internal loop expectations
             conn.settimeout(12.0)
-            
-            # Use a persistent residual storage buffer to hold fragments across read boundaries
             remainder_buffer = ""
             
             while True:
@@ -59,19 +58,16 @@ def run_collector():
                 
                 remainder_buffer += data.decode('ascii', errors='ignore')
                 
-                # Extract and process completed individual lines out of the stream 
                 while "\n" in remainder_buffer:
                     line_segment, remainder_buffer = remainder_buffer.split("\n", 1)
                     clean_line = line_segment.strip()
                     if clean_line:
                         lines.append(clean_line)
-                        # Immediately ACK each single individual entry line to let the client step forward [cite: 25, 27]
                         conn.sendall(b"ACK\n")
                         
         except (socket.timeout, socket.error):
             pass
         finally:
-            # Process remaining text without trailing newline markers
             if remainder_buffer.strip():
                 lines.append(remainder_buffer.strip())
             
@@ -82,7 +78,8 @@ def run_collector():
                 total_lines = len(lines)
                 
                 for index, line in enumerate(lines):
-                    if len(line) >= 12:
+                    # Only parse lines that match the strict 12-character hex payload requirement
+                    if len(line) == 12:
                         minutes_back = (total_lines - 1 - index) * 10
                         line_timestamp = current_time - timedelta(minutes=minutes_back)
                         handle_mailbox_data(line, line_timestamp)
