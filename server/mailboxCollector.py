@@ -15,13 +15,15 @@ DB_CONFIG = {
     'database': os.getenv('DB_NAME'),
 }
 
+
+
 def send_notification(subject, body):
     # Configuration
     smtp_server = "smtp.gmail.com"
     smtp_port = 587
-    sender_email = "frothbeast@gmail.com"
-    receiver_email = "frothbeast@gmail.com"
-    app_password = "your16charactercode"  # Replace with your actual App Password
+    sender_email = os.getenv('SENDER_GMAIL')
+    receiver_email = os.getenv('RECEIVER_GMAIL')
+    app_password = os.getenv('APP_PASS_GMAIL')  
 
     # Create message headers and body
     msg = MIMEMultipart()
