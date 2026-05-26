@@ -15,8 +15,6 @@ DB_CONFIG = {
     'database': os.getenv('DB_NAME'),
 }
 
-
-
 def send_notification(subject, body):
     # Configuration
     smtp_server = "smtp.gmail.com"
@@ -76,6 +74,11 @@ def handle_mailbox_data(hex_str, timestamp):
             send_notification(
                 subject="Mailbox reset", 
                 body="The mailbox door sensor say it was reset.  Love self."
+            )
+        if trigger==0:
+            send_notification(
+                subject="Mailbox power up boot", 
+                body="The mailbox power was reset.  Love self."
             )
     except Exception as e:
         print(f"Mailbox Parse Error: {e}")
