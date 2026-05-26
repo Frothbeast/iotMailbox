@@ -3,7 +3,9 @@ import socket
 import mysql.connector
 from datetime import datetime, timedelta
 from dotenv import load_dotenv
-
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
 load_dotenv()
 
 DB_CONFIG = {
@@ -12,6 +14,37 @@ DB_CONFIG = {
     'password': os.getenv('DB_PASS'),
     'database': os.getenv('DB_NAME'),
 }
+
+def send_notification(subject, body):
+    # Configuration
+    smtp_server = "smtp.gmail.com"
+    smtp_port = 587
+    sender_email = "frothbeast@gmail.com"
+    receiver_email = "frothbeast@gmail.com"
+    app_password = "your16charactercode"  # Replace with your actual App Password
+
+    # Create message headers and body
+    msg = MIMEMultipart()
+    msg['From'] = sender_email
+    msg['To'] = receiver_email
+    msg['Subject'] = subject
+    msg.attach(MIMEText(body, 'plain'))
+
+    try:
+        # Establish a secure connection
+        server = smtplib.SMTP(smtp_server, smtp_port)
+        server.starttls()  # Upgrade the connection to secure TLS
+        
+        # Authenticate and send
+        server.login(sender_email, app_password)
+        server.send_message(msg)
+        print("Email sent successfully.")
+        
+    except Exception as e:
+        print(f"Error sending email: {e}")
+        
+    finally:
+        server.quit()
 
 def handle_mailbox_data(hex_str, timestamp):
     conn = None
@@ -32,6 +65,16 @@ def handle_mailbox_data(hex_str, timestamp):
         cursor.execute(query, (timestamp, dev_id, trigger, temp_c, rssi))
         conn.commit()
         cursor.close()
+        if trigger==2:
+            send_notification(
+                subject="Mailbox Opened", 
+                body="The mailbox door sensor say it was opened.  Love self."
+            )
+        if trigger==3:
+            send_notification(
+                subject="Mailbox reset", 
+                body="The mailbox door sensor say it was reset.  Love self."
+            )
     except Exception as e:
         print(f"Mailbox Parse Error: {e}")
     finally:
