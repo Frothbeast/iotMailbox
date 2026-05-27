@@ -17,10 +17,10 @@ const ControlBar = ({ records, columnStats, onHoursChange, selectedHours, clipCl
         <div className="lastRun">
           <span className="label">Last Event</span>
           <span className="value">
-            {columnStats?.lastTrigger === 0 && "power"}
-            {columnStats?.lastTrigger === 1 && "time"}
-            {columnStats?.lastTrigger === 2 && "open"}
-            {columnStats?.lastTrigger === 3 && "reset"}
+            {columnStats?.lastTrigger === "0" && "power"}
+            {columnStats?.lastTrigger === "1" && "time"}
+            {columnStats?.lastTrigger === "2" && "open"}
+            {columnStats?.lastTrigger === "3" && "reset"}
           </span>
           <span className="unit">{columnStats?.lastTime}</span>
         </div>
