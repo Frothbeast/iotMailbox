@@ -30,7 +30,7 @@ def send_notification(subject, body):
 
     try:
         # Using context manager handles initialization errors without crashing finally
-        with smtplib.SMTP(smtp_server, smtp_port) as server:
+        with smtplib.SMTP(smtp_server, smtp_port, timeout=10) as server:
             server.starttls()  # Upgrade connection to secure TLS
             server.login(sender_email, app_password)
             server.send_message(msg)
