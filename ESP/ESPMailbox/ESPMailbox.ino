@@ -37,12 +37,14 @@ const int numUnusedPins = sizeof(unusedPins) / sizeof(unusedPins[0]);
 void setup() {
     setCpuFrequencyMhz(80);
 
+    // Un-isolate pins upon wakeup to restore software control
     gpio_hold_dis((gpio_num_t)HALL_SENSOR_PIN);
     gpio_hold_dis((gpio_num_t)SENSOR_POWER_PIN);
     
+    // Phase 1: Initialize switched power and wait for physical DS18B20 power up
     pinMode(SENSOR_POWER_PIN, OUTPUT);
     digitalWrite(SENSOR_POWER_PIN, HIGH);
-    delay(200);
+    delay(500); // Increased from 200 to allow full internal POR stabilization
 
     pinMode(HALL_SENSOR_PIN, INPUT_PULLUP);
     
@@ -57,11 +59,14 @@ void setup() {
         currentTrigger = (hallState == LOW) ? 2 : 3;
     }
 
+    // Phase 2: Complete the 1-Wire transaction sequence
     sensors.begin();
     float rawTemp = -127.0;
     if (sensors.getDeviceCount() > 0) {
-        sensors.requestTemperatures();
-        delay(800); 
+        sensors.requestTemperatures(); // Sends conversion request command
+        // DallasTemperature library handles conversion delays internally if set to block.
+        // Explicit delay added here to guarantee high-resolution completion window.
+        delay(750); 
         rawTemp = sensors.getTempCByIndex(0);
     }
 
@@ -77,14 +82,17 @@ void setup() {
         sendBufferedData();
     }
 
+    // Configure target interrupt wake state (inverse of current state)
     int wakeLevel = (hallState == LOW) ? 1 : 0; 
     pinMode(HALL_SENSOR_PIN, INPUT_PULLUP);
     esp_deep_sleep_enable_gpio_wakeup(1ULL << HALL_SENSOR_PIN, (esp_deepsleep_gpio_wake_up_mode_t)wakeLevel);
     
+    // Shut down sensor power rail to eliminate idle current leaks
     digitalWrite(SENSOR_POWER_PIN, LOW);
-    pinMode(SENSOR_POWER_PIN, INPUT); 
-    gpio_hold_en((gpio_num_t)SENSOR_POWER_PIN);
-    gpio_hold_en((gpio_num_t)HALL_SENSOR_PIN);
+    pinMode(SENSOR_POWER_PIN, OUTPUT); 
+    gpio_hold_en((gpio_num_t)SENSOR_POWER_PIN); // Lock low state during sleep
+    
+    // HALL_SENSOR_PIN hold removed to keep the pin connected to the RTC wake matrix
     
     WiFi.disconnect(true);
     WiFi.mode(WIFI_OFF);
@@ -107,7 +115,6 @@ void setup() {
 
 void initWiFi() {
     WiFi.config(local_IP, gateway, subnet, dns);
-    // Connects instantly by bypassing the multi-channel scan
     WiFi.begin(WIFI_SSID, WIFI_PASS, WIFI_CHANNEL, WIFI_BSSID);
 }
 
