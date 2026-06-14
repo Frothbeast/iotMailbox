@@ -1,15 +1,12 @@
 #include <WiFi.h>
 #include <OneWire.h>
 #include <DallasTemperature.h>
-#include <Adafruit_NeoPixel.h>
 #include "config.h"
 #include "driver/gpio.h"
 
 #define HALL_SENSOR_PIN 3
 #define ONE_WIRE_BUS 2
 #define SENSOR_POWER_PIN 4 
-#define RGB_LED_PIN 8 
-#define NUM_PIXELS 1
 #define MAX_PACKETS 10 
 
 IPAddress local_IP(DEVICE_IP);
@@ -20,7 +17,7 @@ IPAddress dns(DEVICE_DNS);
 RTC_DATA_ATTR struct Packet {
     uint8_t id;
     uint8_t trigger;
-    int16_t temp; 
+    int16_t temp;
     int16_t rssi;
 } buffer[MAX_PACKETS];
 
@@ -29,7 +26,13 @@ RTC_DATA_ATTR int16_t lastValidRSSI = 0;
 
 OneWire oneWire(ONE_WIRE_BUS);
 DallasTemperature sensors(&oneWire);
-Adafruit_NeoPixel pixels(NUM_PIXELS, RGB_LED_PIN, NEO_GRB + NEO_KHZ800);
+
+// Array of all valid GPIO pins on the ESP32-C3-WROOM-02 to configure before sleep
+const gpio_num_t unusedPins[] = {
+    GPIO_NUM_0, GPIO_NUM_1, GPIO_NUM_5, GPIO_NUM_6, 
+    GPIO_NUM_7, GPIO_NUM_10, GPIO_NUM_18, GPIO_NUM_19
+};
+const int numUnusedPins = sizeof(unusedPins) / sizeof(unusedPins[0]);
 
 void setup() {
     setCpuFrequencyMhz(80);
@@ -39,26 +42,19 @@ void setup() {
     
     pinMode(SENSOR_POWER_PIN, OUTPUT);
     digitalWrite(SENSOR_POWER_PIN, HIGH);
-    delay(200); 
+    delay(200);
 
-    pixels.begin();
-    pixels.setBrightness(50);
     pinMode(HALL_SENSOR_PIN, INPUT_PULLUP);
     
     int hallState = digitalRead(HALL_SENSOR_PIN);
     esp_sleep_wakeup_cause_t reason = esp_sleep_get_wakeup_cause();
-    uint8_t currentTrigger = 1; 
+    uint8_t currentTrigger = 1;
 
     if (reason == ESP_SLEEP_WAKEUP_UNDEFINED) {
-        currentTrigger = 0; 
+        currentTrigger = 0;
     } 
     else if (reason == ESP_SLEEP_WAKEUP_GPIO) {
         currentTrigger = (hallState == LOW) ? 2 : 3;
-    }
-
-    if (hallState == LOW) {
-        pixels.setPixelColor(0, pixels.Color(0, 255, 0));
-        pixels.show();
     }
 
     sensors.begin();
@@ -81,13 +77,6 @@ void setup() {
         sendBufferedData();
     }
 
-    if (hallState == LOW) {
-        delay(2000);
-    }
-
-    pixels.clear();
-    pixels.show();
-
     int wakeLevel = (hallState == LOW) ? 1 : 0; 
     pinMode(HALL_SENSOR_PIN, INPUT_PULLUP);
     esp_deep_sleep_enable_gpio_wakeup(1ULL << HALL_SENSOR_PIN, (esp_deepsleep_gpio_wake_up_mode_t)wakeLevel);
@@ -101,13 +90,25 @@ void setup() {
     WiFi.mode(WIFI_OFF);
     btStop();
 
+    // Configure all unused pins with internal pull-downs to eliminate leakage current
+    for (int i = 0; i < numUnusedPins; i++) {
+        gpio_config_t io_conf = {};
+        io_conf.intr_type = GPIO_INTR_DISABLE;
+        io_conf.mode = GPIO_MODE_INPUT;
+        io_conf.pin_bit_mask = (1ULL << unusedPins[i]);
+        io_conf.pull_down_en = GPIO_PULLDOWN_ENABLE;
+        io_conf.pull_up_en = GPIO_PULLUP_DISABLE;
+        gpio_config(&io_conf);
+    }
+
     esp_sleep_enable_timer_wakeup(600ULL * 1000000ULL); 
     esp_deep_sleep_start();
 }
 
 void initWiFi() {
     WiFi.config(local_IP, gateway, subnet, dns);
-    WiFi.begin(WIFI_SSID, WIFI_PASS);
+    // Connects instantly by bypassing the multi-channel scan
+    WiFi.begin(WIFI_SSID, WIFI_PASS, WIFI_CHANNEL, WIFI_BSSID);
 }
 
 void sendBufferedData() {
@@ -119,13 +120,12 @@ void sendBufferedData() {
     }
 
     if (WiFi.status() == WL_CONNECTED) {
-        lastValidRSSI = (int16_t)WiFi.RSSI(); // Update RSSI before sending
+        lastValidRSSI = (int16_t)WiFi.RSSI();
         
         WiFiClient client;
         if (client.connect(SERVER_IP, SERVER_PORT)) {
             client.setTimeout(2000);
             for (int i = 0; i < packetCount; i++) {
-                // If this is the first packet of a session, update its RSSI with the live value
                 if (i == packetCount - 1) {
                     buffer[i].rssi = lastValidRSSI;
                 }
