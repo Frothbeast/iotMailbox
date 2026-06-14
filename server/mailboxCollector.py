@@ -29,15 +29,14 @@ def send_notification(subject, body):
     msg.attach(MIMEText(body, 'plain'))
 
     try:
-        server = smtplib.SMTP(smtp_server, smtp_port)
-        server.starttls()
-        server.login(sender_email, app_password)
-        server.send_message(msg)
-        print("Email sent successfully.")
+        # Using context manager handles initialization errors without crashing finally
+        with smtplib.SMTP(smtp_server, smtp_port) as server:
+            server.starttls()  # Upgrade connection to secure TLS
+            server.login(sender_email, app_password)
+            server.send_message(msg)
+            print("Email sent successfully.")
     except Exception as e:
         print(f"Error sending email: {e}")
-    finally:
-        server.quit()
 
 def handle_mailbox_data(hex_str, timestamp):
     conn = None

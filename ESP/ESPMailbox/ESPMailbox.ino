@@ -27,9 +27,8 @@ RTC_DATA_ATTR int16_t lastValidRSSI = 0;
 OneWire oneWire(ONE_WIRE_BUS);
 DallasTemperature sensors(&oneWire);
 
-// Array of all valid GPIO pins on the ESP32-C3-WROOM-02 to configure before sleep
 const gpio_num_t unusedPins[] = {
-    GPIO_NUM_0, GPIO_NUM_1, GPIO_NUM_5, GPIO_NUM_6, 
+    GPIO_NUM_0, GPIO_NUM_1, GPIO_NUM_6, 
     GPIO_NUM_7, GPIO_NUM_10, GPIO_NUM_18, GPIO_NUM_19
 };
 const int numUnusedPins = sizeof(unusedPins) / sizeof(unusedPins[0]);
@@ -37,68 +36,116 @@ const int numUnusedPins = sizeof(unusedPins) / sizeof(unusedPins[0]);
 void setup() {
     setCpuFrequencyMhz(80);
 
-    // Un-isolate pins upon wakeup to restore software control
+    // 1. Release all hardware locks immediately upon boot
     gpio_hold_dis((gpio_num_t)HALL_SENSOR_PIN);
     gpio_hold_dis((gpio_num_t)SENSOR_POWER_PIN);
-    
-    // Phase 1: Initialize switched power and wait for physical DS18B20 power up
+
+    pinMode(SENSOR_POWER_PIN, INPUT);
+    pinMode(HALL_SENSOR_PIN, INPUT_PULLUP); // Standardize on a constant baseline pull-up
+    delay(10); 
+
     pinMode(SENSOR_POWER_PIN, OUTPUT);
     digitalWrite(SENSOR_POWER_PIN, HIGH);
-    delay(500); // Increased from 200 to allow full internal POR stabilization
-
-    pinMode(HALL_SENSOR_PIN, INPUT_PULLUP);
     
-    int hallState = digitalRead(HALL_SENSOR_PIN);
+    // Hardware Debounce: Let physical switch stabilization complete
+    delay(50); 
+    
+    int currentHallState = digitalRead(HALL_SENSOR_PIN);
     esp_sleep_wakeup_cause_t reason = esp_sleep_get_wakeup_cause();
-    uint8_t currentTrigger = 1;
-
-    if (reason == ESP_SLEEP_WAKEUP_UNDEFINED) {
-        currentTrigger = 0;
-    } 
-    else if (reason == ESP_SLEEP_WAKEUP_GPIO) {
-        currentTrigger = (hallState == LOW) ? 2 : 3;
-    }
-
-    // Phase 2: Complete the 1-Wire transaction sequence
+    
     sensors.begin();
+    sensors.setWaitForConversion(false); 
     float rawTemp = -127.0;
     if (sensors.getDeviceCount() > 0) {
-        sensors.requestTemperatures(); // Sends conversion request command
-        // DallasTemperature library handles conversion delays internally if set to block.
-        // Explicit delay added here to guarantee high-resolution completion window.
+        sensors.requestTemperatures();
         delay(750); 
         rawTemp = sensors.getTempCByIndex(0);
     }
+    int16_t currentTempPayload = (int16_t)(rawTemp * 100);
 
-    if (packetCount < MAX_PACKETS) {
-        buffer[packetCount].id = 0x01;
-        buffer[packetCount].trigger = currentTrigger;
-        buffer[packetCount].temp = (int16_t)(rawTemp * 100);
-        buffer[packetCount].rssi = lastValidRSSI; 
-        packetCount++;
+    bool forceSend = false;
+
+    if (reason == ESP_SLEEP_WAKEUP_UNDEFINED) {
+        if (packetCount < MAX_PACKETS) {
+            buffer[packetCount].id = 0x01;
+            buffer[packetCount].trigger = 0;
+            buffer[packetCount].temp = currentTempPayload;
+            buffer[packetCount].rssi = lastValidRSSI;
+            packetCount++;
+        }
+        forceSend = true;
+    } 
+    else if (reason == ESP_SLEEP_WAKEUP_TIMER) {
+        if (packetCount < MAX_PACKETS) {
+            buffer[packetCount].id = 0x01;
+            buffer[packetCount].trigger = 1;
+            buffer[packetCount].temp = currentTempPayload;
+            buffer[packetCount].rssi = lastValidRSSI;
+            packetCount++;
+        }
+    } 
+    else if (reason == ESP_SLEEP_WAKEUP_GPIO) {
+        // Correct Mapping: LOW = Magnet Present (Trigger 2), HIGH = Magnet Removed (Trigger 3)
+        uint8_t initialTrigger = (currentHallState == LOW) ? 2 : 3; 
+        if (packetCount < MAX_PACKETS) {
+            buffer[packetCount].id = 0x01;
+            buffer[packetCount].trigger = initialTrigger;
+            buffer[packetCount].temp = currentTempPayload;
+            buffer[packetCount].rssi = lastValidRSSI;
+            packetCount++;
+        }
+
+        // Active Monitor Window: Watch for fast immediate follow-up transitions
+        int lastObservedState = currentHallState;
+        unsigned long monitorStart = millis();
+        while (millis() - monitorStart < 3000) {
+            int liveState = digitalRead(HALL_SENSOR_PIN);
+            if (liveState != lastObservedState) {
+                delay(20); // Debounce physical switch contacts
+                liveState = digitalRead(HALL_SENSOR_PIN); 
+                if (liveState != lastObservedState) {
+                    uint8_t secondaryTrigger = (liveState == LOW) ? 2 : 3;
+                    if (packetCount < MAX_PACKETS) {
+                        buffer[packetCount].id = 0x01;
+                        buffer[packetCount].trigger = secondaryTrigger;
+                        buffer[packetCount].temp = currentTempPayload;
+                        buffer[packetCount].rssi = lastValidRSSI;
+                        packetCount++;
+                    }
+                    lastObservedState = liveState;
+                }
+            }
+            delay(10);
+        }
+        forceSend = true;
     }
 
-    if (currentTrigger == 0 || currentTrigger == 2 || currentTrigger == 3 || packetCount >= 6) {
+    // Capture finalized physical position before entering sleep configuration
+    int finalHallState = digitalRead(HALL_SENSOR_PIN);
+
+    if (forceSend || packetCount >= 6) {
         sendBufferedData();
     }
 
-    // Configure target interrupt wake state (inverse of current state)
-    int wakeLevel = (hallState == LOW) ? 1 : 0; 
-    pinMode(HALL_SENSOR_PIN, INPUT_PULLUP);
+    // 2. Set static hardware environment and dynamic wakeup logic
+    gpio_pulldown_dis((gpio_num_t)HALL_SENSOR_PIN);
+    gpio_pullup_en((gpio_num_t)HALL_SENSOR_PIN);
+    
+    // Arm next wake state based on the current settled configuration
+    int wakeLevel = (finalHallState == HIGH) ? 0 : 1; 
     esp_deep_sleep_enable_gpio_wakeup(1ULL << HALL_SENSOR_PIN, (esp_deepsleep_gpio_wake_up_mode_t)wakeLevel);
     
-    // Shut down sensor power rail to eliminate idle current leaks
+    // Lock pin configuration constraints into the low-power hardware domain
+    gpio_hold_en((gpio_num_t)HALL_SENSOR_PIN);
+
     digitalWrite(SENSOR_POWER_PIN, LOW);
     pinMode(SENSOR_POWER_PIN, OUTPUT); 
-    gpio_hold_en((gpio_num_t)SENSOR_POWER_PIN); // Lock low state during sleep
-    
-    // HALL_SENSOR_PIN hold removed to keep the pin connected to the RTC wake matrix
+    gpio_hold_en((gpio_num_t)SENSOR_POWER_PIN); 
     
     WiFi.disconnect(true);
     WiFi.mode(WIFI_OFF);
     btStop();
 
-    // Configure all unused pins with internal pull-downs to eliminate leakage current
     for (int i = 0; i < numUnusedPins; i++) {
         gpio_config_t io_conf = {};
         io_conf.intr_type = GPIO_INTR_DISABLE;
@@ -114,6 +161,8 @@ void setup() {
 }
 
 void initWiFi() {
+    WiFi.disconnect(true);
+    WiFi.mode(WIFI_STA); 
     WiFi.config(local_IP, gateway, subnet, dns);
     WiFi.begin(WIFI_SSID, WIFI_PASS, WIFI_CHANNEL, WIFI_BSSID);
 }
@@ -128,7 +177,6 @@ void sendBufferedData() {
 
     if (WiFi.status() == WL_CONNECTED) {
         lastValidRSSI = (int16_t)WiFi.RSSI();
-        
         WiFiClient client;
         if (client.connect(SERVER_IP, SERVER_PORT)) {
             client.setTimeout(2000);
@@ -159,7 +207,7 @@ void sendBufferedData() {
             }
             client.stop();
         }
-        packetCount = 0;
+        packetCount = 0; 
     }
 }
 
