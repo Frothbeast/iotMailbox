@@ -21,7 +21,7 @@ export const calculateColumnStats = (records) => {
   return {
     temp: { avg: StatsLib.avg(temps).toFixed(1), max: StatsLib.max(temps), min: StatsLib.min(temps) },
     rssi: { avg: StatsLib.avg(rssis).toFixed(0), max: StatsLib.max(rssis), min: StatsLib.min(rssis) },
-    lastTime: new Date(last.datetime).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }),
+    lastTime: new Date(last.datetime).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: true }),
     lastTemp: last.temp,
     lastRSSI: last.rssi,
     lastTrigger: last.triggerEvent
