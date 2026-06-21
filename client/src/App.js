@@ -16,6 +16,9 @@ function App() {
 
   const [serverTime, setServerTime] = useState("00:00 AM");
 
+  const [latestTrigger, setLatestTrigger] = useState("NONE");
+  const [latestTriggerDate, setLatestTriggerDate] = useState("");
+
   const cl1pClick = async () => {
     try{
       const response = await fetch(`${process.env.REACT_APP_MAILBOX_API_URL}/api/cl1p`, {method: 'POST', });
@@ -38,6 +41,15 @@ function App() {
       .catch(err => console.error("Time fetch failed", err));
   };
 
+  const fetchLatestPersistentTrigger = () => {
+    fetch(`${process.env.REACT_APP_MAILBOX_API_URL}/api/latest-trigger`)
+      .then(res => res.json())
+      .then(data => {
+        setLatestTrigger(data.latestTrigger);
+        setLatestTriggerDate(data.latestTriggerDate);
+      })
+      .catch(err => console.error("Latest trigger fetch failed", err));
+  };
   useEffect(() => {
     updateTime();
     const interval = setInterval(updateTime, 60000);
@@ -57,6 +69,8 @@ function App() {
         toggleSidebar={() => setSidebarOpen(!isSidebarOpen)}
         isSidebarOpen={isSidebarOpen}
         serverTime={serverTime}
+        latestTrigger={latestTrigger}        
+        latestTriggerDate={latestTriggerDate}
       />
       <main>
         <MailboxSidebar 

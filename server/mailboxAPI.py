@@ -112,6 +112,11 @@ def get_mailbox_data():
         print(f"ERROR: {str(e)}", file=sys.stderr)
         return jsonify([]), 200
 
+
+@app.route('/api/latest-trigger', methods=['GET'])
+def get_latest_trigger():
+    return jsonify({"time":"10:10:10", "last" : "open"})
+
 @app.route('/api/time', methods=['GET'])
 def get_time():
     ontario_tz = pytz.timezone('America/Toronto')

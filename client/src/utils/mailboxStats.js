@@ -17,6 +17,8 @@ export const calculateColumnStats = (records) => {
   const temps = records.map(r => parseFloat(r.temp)).filter(v => !isNaN(v));
   const rssis = records.map(r => parseInt(r.rssi)).filter(v => !isNaN(v));
   const last = records[0];
+  const firstTrigger = records.find(r => r.triggerEvent === 'open' || r.triggerEvent === 'reset');
+  const status = firstTrigger ? firstTrigger.triggerEvent : 'NONE';
 
   return {
     temp: { avg: StatsLib.avg(temps).toFixed(1), max: StatsLib.max(temps), min: StatsLib.min(temps) },
@@ -24,6 +26,7 @@ export const calculateColumnStats = (records) => {
     lastTime: new Date(last.datetime).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: true }),
     lastTemp: last.temp,
     lastRSSI: last.rssi,
-    lastTrigger: last.triggerEvent
+    lastTrigger: last.triggerEvent,
+    status: status
   };
 };
