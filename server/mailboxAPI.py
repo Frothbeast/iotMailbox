@@ -123,7 +123,7 @@ def get_latest_trigger():
         query = """
             SELECT datetime, triggerEvent 
             FROM mailboxData 
-            WHERE triggerEvent IN (2, 3) 
+            WHERE triggerEvent IN ('2', '3') 
             ORDER BY datetime DESC 
             LIMIT 1;
         """
@@ -135,7 +135,7 @@ def get_latest_trigger():
         if row:
             # Look up directly using the integer returned by the DB driver
             evt_int = row['triggerEvent']
-            mapping = {2: 'open', 3: 'reset'}
+            mapping = {'2': 'open', '3': 'reset'}
             latestTrigger = mapping.get(evt_int, 'NONE')
             latestTriggerDate = row['datetime'].strftime('%Y-%m-%d %H:%M:%S') if hasattr(row['datetime'], 'strftime') else str(row['datetime'])
         else:
