@@ -120,7 +120,7 @@
 }
 
 .mailboxTablePlaceholder {
-  height: var(--controlBar-height);
+  height: var(--mailboxTable__header-height);
 
 }
 
