@@ -115,7 +115,39 @@ def get_mailbox_data():
 
 @app.route('/api/latest-trigger', methods=['GET'])
 def get_latest_trigger():
-    return jsonify({"time":"10:10:10", "last" : "open"})
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+        
+        # Using raw integers to match the INT type of triggerEvent
+        query = """
+            SELECT datetime, triggerEvent 
+            FROM mailboxData 
+            WHERE triggerEvent IN (2, 3) 
+            ORDER BY datetime DESC 
+            LIMIT 1;
+        """
+        cursor.execute(query)
+        row = cursor.fetchone() 
+        cursor.close()
+        conn.close()
+    
+        if row:
+            # Look up directly using the integer returned by the DB driver
+            evt_int = row['triggerEvent']
+            mapping = {2: 'open', 3: 'reset'}
+            latestTrigger = mapping.get(evt_int, 'NONE')
+            latestTriggerDate = row['datetime'].strftime('%Y-%m-%d %H:%M:%S') if hasattr(row['datetime'], 'strftime') else str(row['datetime'])
+        else:
+            latestTrigger = 'NONE'
+            latestTriggerDate = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+
+        return jsonify({"latestTriggerDate": latestTriggerDate, "latestTrigger": latestTrigger}), 200
+
+    except Exception as e:
+        print(f"ERROR: {str(e)}", file=sys.stderr)
+        error_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        return jsonify({"latestTriggerDate": error_time, "latestTrigger": "UNKNOWN"}), 200
 
 @app.route('/api/time', methods=['GET'])
 def get_time():

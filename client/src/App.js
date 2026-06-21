@@ -52,7 +52,8 @@ function App() {
   };
   useEffect(() => {
     updateTime();
-    const interval = setInterval(updateTime, 60000);
+    fetchLatestPersistentTrigger();
+    const interval = setInterval(updateTime, 5000);
     return () => clearInterval(interval);
   }, []);
 
