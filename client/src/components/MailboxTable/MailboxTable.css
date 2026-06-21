@@ -119,7 +119,7 @@
   background-color: rgba(255, 255, 255, 0.1);
 }
 
-.mailboxTablePlaceholder{
+.mailboxTablePlaceholder {
   height: var(--mailboxTable__header-height);
 
 }
@@ -129,9 +129,9 @@
 }
 
 .stack-text {
-  word-spacing: 100vw;   /* Forces the next word to the next line */
-  white-space: normal;   /* Ensures wrapping is allowed */
-  word-break: keep-all;  /* Prevents the words themselves from breaking */
+  word-spacing: 100vw;   
+  white-space: normal;   
+  word-break: keep-all;  
 }
 
 .smaller{

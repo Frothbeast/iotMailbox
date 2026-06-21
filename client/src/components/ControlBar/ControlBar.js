@@ -2,7 +2,7 @@ import React from 'react';
 import MailboxChart from '../MailboxTable/MailboxChart'; // Reuse existing chart component
 import './ControlBar.css';
 
-const ControlBar = ({ records, columnStats, onHoursChange, selectedHours, clipClick, serverTime, toggleSidebar, cl1pClick, isSidebarOpen }) => {
+const ControlBar = ({ records, columnStats, onHoursChange, selectedHours, clipClick, serverTime, toggleSidebar, cl1pClick, isSidebarOpen, latestTrigger, latestTriggerDate }) => {
   return (
     <header className="controlBar">
       <div className="brandSection">
@@ -23,6 +23,11 @@ const ControlBar = ({ records, columnStats, onHoursChange, selectedHours, clipCl
             {columnStats?.lastTrigger === "3" && "reset"}
           </span>
           <span className="unit">{columnStats?.lastTime}</span>
+        </div>
+        <div className="status">
+          <span className="label">Mailbox Status</span>
+          <span className="value">{latestTrigger}</span>
+          <span className="unit">{latestTriggerDate}</span>
         </div>
         <div className="lastTemp">
           <span className="label">Outside Temp</span>

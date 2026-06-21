@@ -5,7 +5,7 @@ const MailboxTable = ({ records, columnStats }) => {
   return (
     <div className="tableContainer">
       <table className="mailboxTable">
-        <thead>
+        <thead className="mailboxTableHeader">
           <tr>
             <th>Time</th>
             <th>Trigger</th>
