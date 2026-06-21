@@ -24,6 +24,10 @@ const ControlBar = ({ records, columnStats, onHoursChange, selectedHours, clipCl
           </span>
           <span className="unit">{columnStats?.lastTime}</span>
         </div>
+        <div className="status">
+          <span className="label">Mailbox Status</span>
+          <span className="value">Testing</span>
+        </div>
         <div className="lastTemp">
           <span className="label">Outside Temp</span>
           <span className="value">{columnStats?.lastTemp}</span>
