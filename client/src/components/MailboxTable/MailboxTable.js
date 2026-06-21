@@ -6,11 +6,11 @@ const MailboxTable = ({ records, columnStats }) => {
     <div className="tableContainer">
       <table className="mailboxTable">
         <thead className="mailboxTableHeader">
-          <tr>
-            <th>Time</th>
-            <th>Trigger</th>
-            <th>Temp °C</th>
-            <th>RSSI dB</th>
+          <tr className="mailboxTableHeaderRow1">
+            <th className="mailboxTableHeaderCellRow1">Time</th>
+            <th className="mailboxTableHeaderCellRow1">Trigger</th>
+            <th className="mailboxTableHeaderCellRow1">Temp °C</th>
+            <th className="mailboxTableHeaderCellRow1">RSSI dB</th>
           </tr>
         </thead>
         <tbody className="mailboxTableBody">
