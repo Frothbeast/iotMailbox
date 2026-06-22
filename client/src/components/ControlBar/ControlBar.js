@@ -15,12 +15,12 @@ const ControlBar = ({ records, columnStats, onHoursChange, selectedHours, clipCl
 
       <div className="centerSection">
         <div className="status">
-          <span className="label">Mailbox Status</span>
+          <span className="label">Status</span>
           <span className="value">{latestTrigger}</span>
           <span className="unit">{latestTriggerDate}</span>
         </div>
         <div className="lastTemp">
-          <span className="label">Outside Temp</span>
+          <span className="label">Temp</span>
           <span className="value">{columnStats?.lastTemp}</span>
           <span className="unit">°C</span>
         </div>

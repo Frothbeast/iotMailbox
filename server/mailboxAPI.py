@@ -135,12 +135,12 @@ def get_latest_trigger():
         if row:
             # Look up directly using the integer returned by the DB driver
             evt_int = row['triggerEvent']
-            mapping = {'2': 'open', '3': 'reset'}
-            latestTrigger = mapping.get(evt_int, 'NONE')
-            latestTriggerDate = row['datetime'].strftime('%Y-%m-%d %H:%M:%S') if hasattr(row['datetime'], 'strftime') else str(row['datetime'])
+            mapping = {'2': 'Delivery', '3': 'Emptied'}
+            latestTrigger = mapping.get(evt_int, 'Unknown')
+            latestTriggerDate = row['datetime'].strftime('%-I:%M%p %B %d').replace('AM', 'am').replace('PM', 'pm') if hasattr(row['datetime'], 'strftime') else str(row['datetime'])
         else:
             latestTrigger = 'NONE'
-            latestTriggerDate = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            latestTriggerDate = datetime.now().strftime('%-I:%M%p %B %d').replace('AM', 'am').replace('PM', 'pm')
 
         return jsonify({"latestTriggerDate": latestTriggerDate, "latestTrigger": latestTrigger}), 200
 
