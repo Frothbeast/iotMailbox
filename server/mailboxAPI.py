@@ -133,7 +133,6 @@ def get_latest_trigger():
         conn.close()
     
         if row:
-            # Look up directly using the integer returned by the DB driver
             evt_int = row['triggerEvent']
             mapping = {'2': 'Delivery', '3': 'Emptied'}
             latestTrigger = mapping.get(evt_int, 'Unknown')
