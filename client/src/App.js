@@ -50,10 +50,15 @@ function App() {
       })
       .catch(err => console.error("Latest trigger fetch failed", err));
   };
+
   useEffect(() => {
-    updateTime();
-    fetchLatestPersistentTrigger();
-    const interval = setInterval(updateTime, 5000);
+    const updateBoth = () => {
+      updateTime();
+      fetchLatestPersistentTrigger();
+    };
+
+    updateBoth();
+    const interval = setInterval(updateBoth, 5000);
     return () => clearInterval(interval);
   }, []);
 
