@@ -23,6 +23,7 @@ const ControlBar = ({ records, columnStats, onHoursChange, selectedHours, clipCl
           <span className="label">Temp</span>
           <span className="value">{columnStats?.lastTemp}</span>
           <span className="unit">°C</span>
+          <span className='value'>{columnStats?.lastTime}</span>
         </div>
         <div className="buttonRow">
           <button className="sidebarButton myBUTTon" onClick={toggleSidebar}>
