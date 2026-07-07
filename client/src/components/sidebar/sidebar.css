@@ -17,7 +17,6 @@
 .sidebar.open {
   right: 0; 
 }
-
 .sidebarContent {
   display: flex;
   flex-direction: column;
@@ -27,22 +26,25 @@
   box-sizing: border-box;
 }
 
+/* Remove the flex and column displays from chartContainer */
 .sidebar .chartContainer {
   width: 100%;
   position: relative;
   box-sizing: border-box;
   border: 2px solid black;
   overflow: hidden;
-  display: flex; 
-  flex-direction: column;
+  /* Remove display: flex and flex-direction: column here */
 }
 
+/* Explicitly size the containers using the IDs */
 #tempChart {
-  flex: 2; /* 2/3 height */
+  flex: 2; /* 2/3 of vertical space */
+  display: flex; /* Ensures child fills the space */
 }
 
 #RSSI {
-  flex: 1; /* 1/3 height */
+  flex: 1; /* 1/3 of vertical space */
+  display: flex; /* Ensures child fills the space */
 }
 
 @container sidebarArea (max-width: 600px) {
