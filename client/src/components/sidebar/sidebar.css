@@ -19,31 +19,30 @@
 }
 
 .sidebarContent {
-  container-type: size;
-  container-name: sidebarArea;
+  display: flex;
+  flex-direction: column;
   width: 100%;
   height: 100%;
-  display: flex;
-  flex-direction: column; /* Ensure vertical stacking */
   border: 2px solid black;
   box-sizing: border-box;
 }
 
 .sidebar .chartContainer {
-  /* Remove flex: 0 0 100%; */
   width: 100%;
   position: relative;
   box-sizing: border-box;
   border: 2px solid black;
-  overflow: hidden; 
+  overflow: hidden;
+  display: flex; 
+  flex-direction: column;
 }
 
 #tempChart {
-  flex: 2; /* Takes 2/3 of available space */
+  flex: 2; /* 2/3 height */
 }
 
 #RSSI {
-  flex: 1; /* Takes 1/3 of available space */
+  flex: 1; /* 1/3 height */
 }
 
 @container sidebarArea (max-width: 600px) {
