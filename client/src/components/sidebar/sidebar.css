@@ -30,20 +30,19 @@
   width: 100%;
   display: flex;
   flex-direction: column;
-  /* Override default behavior to force percentage distribution */
-  flex-basis: 0; 
-  flex-grow: 1; 
-  min-height: 0; /* Forces the item to honor the flex ratio regardless of content */
+  /* Remove flex-grow: 1 from here */
+  flex-basis: auto; 
+  min-height: 0; 
   border: 2px solid black;
   box-sizing: border-box;
 }
 
 #tempChart {
-  flex-grow: 2; /* 2/3 of space */
+  flex-grow: 2; /* Forces 2/3 allocation */
 }
 
 #RSSI {
-  flex-grow: 1; /* 1/3 of space */
+  flex-grow: 1; /* Forces 1/3 allocation */
 }
 
 .chartContainer canvas {
