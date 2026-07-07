@@ -24,7 +24,7 @@
   width: 100%;
   height: 100%;
   display: flex;
-  flex-wrap: wrap;
+  flex-direction: column; /* Ensure vertical stacking */
   border: 2px solid black;
   box-sizing: border-box;
 }
@@ -39,17 +39,23 @@
 }
 
 #tempChart {
-  flex: 0 0 100%; 
+  flex: 2; /* Takes 2/3 of available space */
   width: 100%;
-  height: 50%;
 }
 
- @container sidebarArea (max-width: 600px) {
-  .sidebar [class^="chartContainer"] {
-    flex-basis: 100%;
-    height: 50%; 
+#RSSI {
+  flex: 1; /* Takes 1/3 of available space */
+  width: 100%;
+}
+
+@container sidebarArea (max-width: 600px) {
+  .sidebarContent {
+    flex-direction: column;
   }
   #tempChart {
-  height: 50%;
-}
+    flex: 2;
+  }
+  #RSSI {
+    flex: 1;
+  }
 }

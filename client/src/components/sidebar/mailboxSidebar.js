@@ -68,7 +68,7 @@ const MailboxSidebar = ({ isOpen, records, selectedHours }) => {
             options={optTemp}
           />
         </div>
-        <div className="chartContainer">
+        <div className="chartContainer" id="RSSI">
           <MailboxChart
             labels={labels}
             datasets={[
