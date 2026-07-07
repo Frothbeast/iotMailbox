@@ -48,6 +48,7 @@
 @container sidebarArea (max-width: 600px) {
   .sidebarContent {
     flex-direction: column;
+    min-height: 0;
   }
   #tempChart {
     flex: 2;
