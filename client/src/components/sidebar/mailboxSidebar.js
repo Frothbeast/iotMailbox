@@ -13,6 +13,7 @@ const MailboxSidebar = ({ isOpen, records, selectedHours }) => {
   const createConfig = (unit) => ({
     responsive: true,
     maintainAspectRatio: false,
+    resizeDelay: 300,
     elements: {
       point: {
         radius: 0, 
