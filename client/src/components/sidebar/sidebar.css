@@ -19,33 +19,21 @@
 }
 
 .sidebarContent {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  /* Define two rows with a 2:1 ratio */
+  grid-template-rows: 2fr 1fr;
   width: 100%;
   height: 100%;
-  /* No heights or margins here */
+  box-sizing: border-box;
 }
 
 .chartContainer {
   width: 100%;
-  display: flex;
-  flex-direction: column;
   border: 2px solid black;
   box-sizing: border-box;
   overflow: hidden;
-  /* Crucial: let the ID control the growth */
-  flex-grow: 1;
-  flex-shrink: 0;
-  flex-basis: 0;
-  min-height: 0; 
-}
-
-#tempChart {
-  flex-grow: 2; /* Takes 2 parts of the 3 total */
-}
-
-#RSSI {
-  flex-grow: 1; /* Takes 1 part of the 3 total */
+  /* This ensures the chart stays within the grid cell */
+  position: relative;
 }
 
 .chartContainer canvas {
