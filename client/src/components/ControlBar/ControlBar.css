@@ -179,7 +179,7 @@ input[type="submit"] {
   padding: 0 2cqw;
 }
 
-.sidebarContent {
+.chartSection {
   display: flex;
   flex-direction: column; /* Stacks children vertically */
   width: 100%;
