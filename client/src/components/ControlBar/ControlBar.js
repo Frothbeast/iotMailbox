@@ -44,7 +44,7 @@ const ControlBar = ({ records, columnStats, onHoursChange, selectedHours, clipCl
       </div>
 
       <div className="chartSection">
-        <div className="chartContainer id=temp">
+        <div id="temp" className="chartContainer">
            <div className="chartWatermark">TEMP</div>
            <MailboxChart 
               labels={records.map((_, i) => i)}
@@ -64,7 +64,7 @@ const ControlBar = ({ records, columnStats, onHoursChange, selectedHours, clipCl
               }}
            />
         </div>
-        <div className="chartContainer id=rssi">
+        <div id="rssi" className="chartContainer">
            <div className="chartWatermark">RSSI</div>
            <MailboxChart 
               labels={records.map((_, i) => i)}
