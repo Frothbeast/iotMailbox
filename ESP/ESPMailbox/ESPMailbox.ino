@@ -54,11 +54,12 @@ void setup() {
     esp_sleep_wakeup_cause_t reason = esp_sleep_get_wakeup_cause();
     
     sensors.begin();
-    sensors.setWaitForConversion(false); 
+    sensors.setWaitForConversion(false);
+    sensors.setResolution(9); // Set DS18B20 to 9-bit resolution 
     float rawTemp = -127.0;
     if (sensors.getDeviceCount() > 0) {
         sensors.requestTemperatures();
-        delay(750); 
+        delay(94); 
         rawTemp = sensors.getTempCByIndex(0);
     }
     int16_t currentTempPayload = (int16_t)(rawTemp * 100);
