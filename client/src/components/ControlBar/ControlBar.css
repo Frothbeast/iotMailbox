@@ -28,7 +28,7 @@
   width: 100%;
 }
 
-.serverTime {
+.serverTime, .currentTwmp {
   flex: 1;
   display: flex;
   align-items: flex-start;
@@ -112,8 +112,8 @@ input[type="submit"] {
 
 
 .chartSection {
+  flex-basis: 30%;
   display: grid;
-  /* Enforce 2/3 and 1/3 vertical split */
   grid-template-rows: 2fr 1fr;
   width: 100%;
   height: 100%;
