@@ -8,6 +8,7 @@ const ControlBar = ({ records, columnStats, onHoursChange, selectedHours, clipCl
       <div className="brandSection">
         <div className="brand">Mailbox</div>
         <div className="currentTemp">
+          <span className="label">Temp</span>
           <span className="value">{columnStats?.lastTemp}</span>
           <span className="unit">°C</span>
         </div>
