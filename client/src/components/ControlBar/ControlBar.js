@@ -7,8 +7,12 @@ const ControlBar = ({ records, columnStats, onHoursChange, selectedHours, clipCl
     <header className="controlBar">
       <div className="brandSection">
         <div className="brand">Mailbox</div>
+        <div className="currentTemp">
+          <span className="label">Temp</span>
+          <span className="value">{columnStats?.lastTemp}</span>
+          <span className="unit">°C</span>
+        </div>
         <div className="serverTime">
-          <span className="stLabel">Server Time:</span>
           <span>{serverTime ?? "00:00:00"}</span>
         </div>
       </div>
@@ -20,9 +24,7 @@ const ControlBar = ({ records, columnStats, onHoursChange, selectedHours, clipCl
           <span className="unit">{latestTriggerDate}</span>
         </div>
         <div className="lastTemp">
-          <span className="label">Temp</span>
-          <span className="value">{columnStats?.lastTemp}</span>
-          <span className="unit">°C</span>
+          <span className="label">Last Trigger</span>
           <span className='value'>{columnStats?.lastTime}</span>
         </div>
         <div className="buttonRow">
